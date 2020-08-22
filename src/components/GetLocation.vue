@@ -8,15 +8,16 @@
           <b-col>
             <b-button
               class="mb-3 mr-2"
+              v-show="showMap == true"
               v-b-modal.modal-center.modal-lg
               variant="danger"
-              >Show Me</b-button
+              >Haritada Göster</b-button
             >
             <b-button
               class="mb-3 "
               variant="dark"
               @click="locatorButtonPressed()"
-              >Find My Location</b-button
+              >Konumumu Bul</b-button
             >
           </b-col>
         </b-row>
@@ -31,7 +32,7 @@
       </b-card>
     </div>
 
-    <b-modal id="modal-lg" size="lg" centered title="BootstrapVue">
+    <b-modal id="modal-lg" size="lg" centered title="Çekici Yola Çıktı">
       <GmapMap
         class="map"
         :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
@@ -42,7 +43,7 @@
         <gmap-marker
           :position="towTruck"
           :icon="{
-            url: '/tow-truck (1).png',
+            url: '/towTruck-icon.png',
           }"
         ></gmap-marker>
       </GmapMap>
@@ -68,6 +69,7 @@ export default {
       step: 0,
       interval: null,
       routeData: null,
+      showMap: false,
     };
   },
   computed: {
@@ -78,6 +80,7 @@ export default {
   mounted() {},
   methods: {
     locatorButtonPressed() {
+      this.showMap = true;
       navigator.geolocation.getCurrentPosition(
         (position) => {
           this.getStreetAddressFrom(
@@ -117,6 +120,7 @@ export default {
         }
       } catch (error) {
         console.log(error.message);
+        this.getRouteData();
       }
     },
 
