@@ -32,7 +32,14 @@
       </b-card>
     </div>
 
-    <b-modal id="modal-lg" size="lg" centered title="Çekici Yola Çıktı">
+    <b-modal
+      :title="
+        `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`
+      "
+      id="modal-lg"
+      size="lg"
+      centered
+    >
       <GmapMap
         class="map"
         :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
@@ -43,7 +50,7 @@
         <gmap-marker
           :position="towTruck"
           :icon="{
-            url: '/towTruck-icon.png',
+            url: '/TowTruck-icon.png',
           }"
         ></gmap-marker>
       </GmapMap>
@@ -70,6 +77,9 @@ export default {
       interval: null,
       routeData: null,
       showMap: false,
+      distance: "",
+      duration: "",
+      towTruckPosition: 0,
     };
   },
   computed: {
@@ -80,6 +90,7 @@ export default {
   mounted() {},
   methods: {
     locatorButtonPressed() {
+      this.towTruckPosition = 0;
       this.showMap = true;
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -104,6 +115,7 @@ export default {
     },
     async getRouteData() {
       try {
+        this.towTruckPosition = 1;
         const myRequest = new Request(this.url);
         let response = await axios(myRequest);
         console.log(response);
@@ -130,7 +142,8 @@ export default {
       let steps = this.routeData.legs[0].steps;
       this.towTruck.lat = steps[this.step].end_location.lat;
       this.towTruck.lng = steps[this.step].end_location.lng;
-
+      this.distance = this.routeData.legs[0].distance.text;
+      this.duration = this.routeData.legs[0].duration.text;
       if (steps.length > this.step + 1) this.step++;
       else window.clearInterval(this.interval);
     },
