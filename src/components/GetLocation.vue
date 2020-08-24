@@ -102,7 +102,7 @@ export default {
       const _self = this;
       this.description = "Çekici bekleniyor...";
       window.setTimeout(() => {
-        this.description = `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`;
+        this.description = `Çekiciniz yola çıktı.. Tahmini varış süresi: ${_self.duration} - Tahmini mesafe: ${_self.distance}`;
       }, 5000);
       window.setTimeout(async () => {
         _self.towTruck = { lat: 41.028941, lng: 29.0390162 };
