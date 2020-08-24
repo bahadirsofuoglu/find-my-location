@@ -31,61 +31,11 @@
         ></b-form-textarea>
       </b-card>
     </div>
-    <div v-if="this.towTruckMove === null">
-      <b-modal title=" Çekici bekleniyor..." id="modal-lg" size="lg" centered>
+    <div>
+      <b-modal :title="description" id="modal-lg" size="lg" centered>
         <GmapMap
           class="map"
-          :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
-          :zoom="13"
-        >
-          <gmap-marker :position="userLocation"></gmap-marker>
-
-          <gmap-marker
-            :position="towTruck"
-            :icon="{
-              url: '/TowTruck-icon.png',
-            }"
-          ></gmap-marker>
-        </GmapMap>
-      </b-modal>
-    </div>
-    <div v-else-if="this.towTruckMove === false">
-      <b-modal
-        :title="
-          `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`
-        "
-        id="modal-lg"
-        size="lg"
-        centered
-      >
-        <GmapMap
-          class="map"
-          :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
-          :zoom="13"
-        >
-          <gmap-marker :position="userLocation"></gmap-marker>
-
-          <gmap-marker
-            :position="towTruck"
-            :icon="{
-              url: '/TowTruck-icon.png',
-            }"
-          ></gmap-marker>
-        </GmapMap>
-      </b-modal>
-    </div>
-    <div v-else-if="this.towTruckMove === true">
-      <b-modal
-        title="
-          Çekiciniz konumunuza ulaştı..
-        "
-        id="modal-lg"
-        size="lg"
-        centered
-      >
-        <GmapMap
-          class="map"
-          :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
+          :center="{ lat: towTruck.lat, lng: towTruck.lng }"
           :zoom="13"
         >
           <gmap-marker :position="userLocation"></gmap-marker>
@@ -123,7 +73,8 @@ export default {
       showMap: false,
       distance: "",
       duration: "",
-      towTruckMove: null,
+
+      description: "",
     };
   },
   computed: {
@@ -149,8 +100,9 @@ export default {
         }
       );
       const _self = this;
+      this.description = "Çekici bekleniyor...";
       window.setTimeout(() => {
-        this.towTruckMove = false;
+        this.description = `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`;
       }, 5000);
       window.setTimeout(async () => {
         _self.towTruck = { lat: 41.028941, lng: 29.0390162 };
@@ -196,7 +148,7 @@ export default {
       if (steps.length > this.step + 1) this.step++;
       else {
         window.clearInterval(this.interval);
-        this.towTruckMove = true;
+        this.description = " Çekiciniz konumunuza ulaştı..";
       }
     },
 
