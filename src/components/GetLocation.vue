@@ -7,17 +7,17 @@
 
           <b-col>
             <b-button
+              class="mb-3 mr-2 "
+              variant="dark"
+              @click="locatorButtonPressed()"
+              >Konumumu Bul</b-button
+            >
+            <b-button
               class="mb-3 mr-2"
               v-show="showMap == true"
               v-b-modal.modal-center.modal-lg
               variant="danger"
               >Haritada Göster</b-button
-            >
-            <b-button
-              class="mb-3 "
-              variant="dark"
-              @click="locatorButtonPressed()"
-              >Konumumu Bul</b-button
             >
           </b-col>
         </b-row>
@@ -31,30 +31,74 @@
         ></b-form-textarea>
       </b-card>
     </div>
+    <div v-if="this.towTruckMove === null">
+      <b-modal title=" Çekici bekleniyor..." id="modal-lg" size="lg" centered>
+        <GmapMap
+          class="map"
+          :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
+          :zoom="13"
+        >
+          <gmap-marker :position="userLocation"></gmap-marker>
 
-    <b-modal
-      :title="
-        `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`
-      "
-      id="modal-lg"
-      size="lg"
-      centered
-    >
-      <GmapMap
-        class="map"
-        :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
-        :zoom="13"
+          <gmap-marker
+            :position="towTruck"
+            :icon="{
+              url: '/TowTruck-icon.png',
+            }"
+          ></gmap-marker>
+        </GmapMap>
+      </b-modal>
+    </div>
+    <div v-else-if="this.towTruckMove === false">
+      <b-modal
+        :title="
+          `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`
+        "
+        id="modal-lg"
+        size="lg"
+        centered
       >
-        <gmap-marker :position="userLocation"></gmap-marker>
+        <GmapMap
+          class="map"
+          :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
+          :zoom="13"
+        >
+          <gmap-marker :position="userLocation"></gmap-marker>
 
-        <gmap-marker
-          :position="towTruck"
-          :icon="{
-            url: '/TowTruck-icon.png',
-          }"
-        ></gmap-marker>
-      </GmapMap>
-    </b-modal>
+          <gmap-marker
+            :position="towTruck"
+            :icon="{
+              url: '/TowTruck-icon.png',
+            }"
+          ></gmap-marker>
+        </GmapMap>
+      </b-modal>
+    </div>
+    <div v-else-if="this.towTruckMove === true">
+      <b-modal
+        title="
+          Çekiciniz konumunuza ulaştı..
+        "
+        id="modal-lg"
+        size="lg"
+        centered
+      >
+        <GmapMap
+          class="map"
+          :center="{ lat: this.towTruck.lat, lng: this.towTruck.lng }"
+          :zoom="13"
+        >
+          <gmap-marker :position="userLocation"></gmap-marker>
+
+          <gmap-marker
+            :position="towTruck"
+            :icon="{
+              url: '/TowTruck-icon.png',
+            }"
+          ></gmap-marker>
+        </GmapMap>
+      </b-modal>
+    </div>
   </div>
 </template>
 
@@ -79,7 +123,7 @@ export default {
       showMap: false,
       distance: "",
       duration: "",
-      towTruckPosition: 0,
+      towTruckMove: null,
     };
   },
   computed: {
@@ -92,6 +136,7 @@ export default {
     locatorButtonPressed() {
       this.towTruckPosition = 0;
       this.showMap = true;
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           this.getStreetAddressFrom(
@@ -104,6 +149,9 @@ export default {
         }
       );
       const _self = this;
+      window.setTimeout(() => {
+        this.towTruckMove = false;
+      }, 5000);
       window.setTimeout(async () => {
         _self.towTruck = { lat: 41.028941, lng: 29.0390162 };
         await this.getRouteData();
@@ -111,7 +159,7 @@ export default {
           console.log("interval");
           _self.changeDestination();
         }, 3000);
-      }, 3000);
+      });
     },
     async getRouteData() {
       try {
@@ -124,6 +172,7 @@ export default {
         }
         if (response.data.status !== "OK") {
           console.log(response.error_message);
+
           this.getRouteData();
         } else {
           console.log(response.data.routes);
@@ -145,8 +194,12 @@ export default {
       this.distance = this.routeData.legs[0].distance.text;
       this.duration = this.routeData.legs[0].duration.text;
       if (steps.length > this.step + 1) this.step++;
-      else window.clearInterval(this.interval);
+      else {
+        window.clearInterval(this.interval);
+        this.towTruckMove = true;
+      }
     },
+
     async getStreetAddressFrom(lat, long) {
       try {
         var { data } = await axios.get(
