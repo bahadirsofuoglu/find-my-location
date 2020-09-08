@@ -1,4 +1,5 @@
 # find-my-location
+![ezgif com-video-to-gif](https://user-images.githubusercontent.com/45143524/92524959-a9880280-f22b-11ea-9f80-378ff8a768d5.gif)
 
 ## Project setup
 ```
