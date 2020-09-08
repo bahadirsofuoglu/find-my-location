@@ -10,14 +10,14 @@
               class="mb-3 mr-2 "
               variant="dark"
               @click="locatorButtonPressed()"
-              >Konumumu Bul</b-button
+              >Find Location</b-button
             >
             <b-button
               class="mb-3 mr-2"
               v-show="showMap == true"
               v-b-modal.modal-center.modal-lg
               variant="danger"
-              >Haritada Göster</b-button
+              >Open Map</b-button
             >
           </b-col>
         </b-row>
@@ -73,13 +73,12 @@ export default {
       showMap: false,
       distance: "",
       duration: "",
-
       description: "",
     };
   },
   computed: {
     url() {
-      return `https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=${this.towTruck.lat},${this.towTruck.lng}&destination=${this.userLocation.lat},${this.userLocation.lng}&key=AIzaSyDz1nw7RPkW2jWm9-SOv2tVc4Ss-vKmYCw`;
+      return `https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/directions/json?origin=${this.towTruck.lat},${this.towTruck.lng}&destination=${this.userLocation.lat},${this.userLocation.lng}&key=${process.env.VUE_APP_API}`;
     },
   },
   mounted() {},
@@ -100,15 +99,14 @@ export default {
         }
       );
       const _self = this;
-      this.description = "Çekici bekleniyor...";
+      this.description = "Tow truck is waiting..";
       window.setTimeout(() => {
-        this.description = `Çekiciniz yola çıktı.. Tahmini varış süresi: ${this.duration} - Tahmini mesafe: ${this.distance}`;
+        this.description = `Tow truck is coming.. Estimated time of arrival: ${this.duration} - Estimated duration: ${this.distance}`;
       }, 5000);
       window.setTimeout(async () => {
         _self.towTruck = { lat: 41.028941, lng: 29.0390162 };
         await this.getRouteData();
         _self.interval = window.setInterval(function() {
-          console.log("interval");
           _self.changeDestination();
         }, 3000);
       });
@@ -118,7 +116,7 @@ export default {
         this.towTruckPosition = 1;
         const myRequest = new Request(this.url);
         let response = await axios(myRequest);
-        console.log(response);
+
         if (response.data.status == "NOT_FOUND") {
           this.getRouteData();
         }
@@ -127,7 +125,6 @@ export default {
 
           this.getRouteData();
         } else {
-          console.log(response.data.routes);
           this.routeData =
             response.data.routes.length > 0 ? response.data.routes[0] : null;
         }
@@ -139,7 +136,7 @@ export default {
 
     changeDestination() {
       if (!this.routeData) return;
-      console.log(this.routeData);
+
       let steps = this.routeData.legs[0].steps;
       this.towTruck.lat = steps[this.step].end_location.lat;
       this.towTruck.lng = steps[this.step].end_location.lng;
@@ -148,7 +145,7 @@ export default {
       if (steps.length > this.step + 1) this.step++;
       else {
         window.clearInterval(this.interval);
-        this.description = " Çekiciniz konumunuza ulaştı..";
+        this.description = " tow truck reached to the location..";
       }
     },
 
@@ -159,7 +156,7 @@ export default {
             lat +
             "," +
             long +
-            "&key=AIzaSyDz1nw7RPkW2jWm9-SOv2tVc4Ss-vKmYCw"
+            `&key=${process.env.VUE_APP_API}`
         );
         if (data.error_message) {
           console.log(data.error_message);
@@ -167,10 +164,6 @@ export default {
           this.userLocation.lat = data.results[0].geometry.location.lat;
           this.userLocation.lng = data.results[0].geometry.location.lng;
           this.address = data.results[0].formatted_address;
-
-          console.log(this.url);
-          console.log(this.userLocation.lat);
-          console.log(this.userLocation.lng);
         }
       } catch (error) {
         console.log(error.message);
