@@ -101,7 +101,7 @@ export default {
       const _self = this;
       this.description = "Tow truck is waiting..";
       window.setTimeout(() => {
-        this.description = `Tow truck is coming.. Estimated time of arrival: ${this.duration} - Estimated duration: ${this.distance}`;
+        this.description = `Estimated time of arrival: ${this.duration} - Estimated duration: ${this.distance}`;
       }, 5000);
       window.setTimeout(async () => {
         _self.towTruck = { lat: 41.028941, lng: 29.0390162 };
